@@ -34,6 +34,9 @@ func (t Training) distance() float64 {
 // meanSpeed возвращает среднюю скорость бега или ходьбы.
 func (t Training) meanSpeed() float64 {
 	// вставьте ваш код ниже
+	if t.Duration == 0 {
+		return 0
+	}
 	return t.distance() / t.Duration.Hours()
 }
 
@@ -110,7 +113,6 @@ func (r Running) TrainingInfo() InfoMessage {
 		Duration:     r.Duration,
 		Distance:     r.distance(),
 		Speed:        r.meanSpeed(),
-		Calories:     r.Calories(),
 	}
 }
 
@@ -135,8 +137,8 @@ type Walking struct {
 // Это переопределенный метод Calories() из Training.
 func (w Walking) Calories() float64 {
 	// вставьте ваш код ниже
-	meanSpeedMinH := w.meanSpeed() / KmHInMsec
-	calories := (CaloriesWeightMultiplier*w.Weight + (math.Pow(meanSpeedMinH, 2)/(w.Height/CmInM))*CaloriesSpeedHeightMultiplier*w.Weight*w.Duration.Hours())
+	meanSpeedMinH := w.meanSpeed() * KmHInMsec
+	calories := (CaloriesWeightMultiplier*w.Weight + (math.Pow(meanSpeedMinH, 2)/(w.Height/CmInM))*CaloriesSpeedHeightMultiplier*w.Weight) * w.Duration.Hours() * MinInHours
 	return calories
 }
 
@@ -149,7 +151,6 @@ func (w Walking) TrainingInfo() InfoMessage {
 		Duration:     w.Duration,
 		Distance:     w.distance(),
 		Speed:        w.meanSpeed(),
-		Calories:     w.Calories(),
 	}
 }
 
@@ -174,6 +175,9 @@ type Swimming struct {
 // Это переопределенный метод Calories() из Training.
 func (s Swimming) meanSpeed() float64 {
 	// вставьте ваш код ниже
+	if s.Duration == 0 {
+		return 0
+	}
 	return float64(s.LengthPool) * float64(s.CountPool) / float64(MInKm) / s.Duration.Hours()
 }
 
@@ -196,7 +200,6 @@ func (s Swimming) TrainingInfo() InfoMessage {
 		Duration:     s.Duration,
 		Distance:     s.distance(),
 		Speed:        s.meanSpeed(),
-		Calories:     s.Calories(),
 	}
 }
 
@@ -209,9 +212,7 @@ func ReadData(training CaloriesCalculator) string {
 	// получите информацию о тренировке
 	info := training.TrainingInfo()
 	// добавьте полученные калории в структуру с информацией о тренировке
-	type InfoMessage struct {
-		calories float64
-	}
+	info.Calories = calories
 
 	return fmt.Sprint(info)
 }
